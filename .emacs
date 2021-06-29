@@ -16,7 +16,6 @@
 (eval-when-compile
   (defvar use-package-verbose t)
   (require 'use-package))
-
 ;; EVIL MODE
 (use-package evil)
 (use-package evil-leader)
@@ -24,7 +23,10 @@
   :ensure t
   :config
   (global-evil-surround-mode 1))
+(use-package evil-collection)
 (evil-mode t)
+(evil-collection-init)
+
 
 ;; Leader key
 (global-evil-leader-mode)
@@ -33,13 +35,16 @@
   "<SPC>" 'execute-extended-command
   "bl" 'switch-to-buffer
   "bn" 'switch-to-next-buffer
-  "bb" 'witch-to-previous-buffer
+  "bb" 'switch-to-previous-buffer
   "bd" 'kill-buffer
   "ff" 'find-file
   "ha" 'apropos-command
   "hi" 'info
   "hb" 'describe-bindings
   "hk" 'describe-key
+  "ms" 'magit-status
+  "mc" 'magit-commit
+  "mp" 'magit-push
   "wb" 'balance-windows
   "wv" 'split-window-right
   "ws" 'split-window-below
@@ -50,7 +55,7 @@
 ;; UNDO TREE
 (use-package undo-tree
   :diminish undo-tree-mode
-  :config
+  :config 
   (global-undo-tree-mode 1))
 
 ;; SMOOTH SCROLLING
@@ -72,6 +77,14 @@
   (setq which-key-idle-delay 0.5
         which-key-popup-type 'side-window
         which-key-side-window-location 'bottom))
+
+;; MAGIT
+(use-package magit)
+
+;; COMPANY MODE
+(use-package company)
+;; Enable automatically for all buffers
+(add-hook 'after-init-hook 'global-company-mode)
 
 ;; GENERAL
 ;; Line numbers
@@ -100,10 +113,30 @@
 ;; Load theme
 (load-theme 'dracula t)
 
+
+;; Keybindings
+;; Cancel with <ESC>
+(define-key key-translation-map (kbd "<ESC>") (kbd "C-g"))
+
 ;; Window switching
+(evil-global-set-key 'motion (kbd "C-<up>") 'evil-window-up)
+(evil-global-set-key 'motion (kbd "C-<down>") 'evil-window-down)
+(evil-global-set-key 'motion (kbd "C-<left>") 'evil-window-left)
+(evil-global-set-key 'motion (kbd "C-<right>") 'evil-window-right)
+(evil-global-set-key 'motion (kbd "C-k") 'evil-window-up)
+(evil-global-set-key 'motion (kbd "C-j") 'evil-window-down)
+(evil-global-set-key 'motion (kbd "C-l") 'evil-window-left)
+(evil-global-set-key 'motion (kbd "C-h") 'evil-window-right)
 
-
-
+;; Brackets
+;; Colored paranthesis
+(use-package rainbow-delimiters)
+;; Enable raindow delimiters for all programming modes
+(add-hook 'prog-mode-hook 'rainbow-delimiters-mode) 
+;; Auto close paranthesis
+(use-package smartparens)
+;; Enable smart parenthesis for all programming modes
+(add-hook 'prog-mode-hook 'smartparens-mode) 
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
