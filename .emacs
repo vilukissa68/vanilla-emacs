@@ -17,72 +17,83 @@
   (defvar use-package-verbose t)
   (require 'use-package))
 ;; EVIL MODE
-(use-package evil)
+(use-package evil
+    :init
+    (setq evil-want-keybinding nil))
+    :config
+    (evil-mode 1)
 (use-package evil-leader)
 (use-package evil-surround
   :ensure t
   :config
-  (global-evil-surround-mode 1))
-(use-package evil-collection)
-(evil-mode t)
-(evil-collection-init)
+    (global-evil-surround-mode 1))
+(use-package evil-collection
+  :after evil
+  :config
+    (evil-collection-init))
+
 
 
 ;; Leader key
 (global-evil-leader-mode)
 (evil-leader/set-leader "SPC")
 (evil-leader/set-key 
-  "<SPC>" 'execute-extended-command
-  "bl" 'switch-to-buffer
-  "bn" 'switch-to-next-buffer
-  "bb" 'switch-to-previous-buffer
-  "bd" 'kill-buffer
-  "ff" 'find-file
-  "ha" 'apropos-command
-  "hi" 'info
-  "hb" 'describe-bindings
-  "hk" 'describe-key
-  "ms" 'magit-status
-  "mc" 'magit-commit
-  "mp" 'magit-push
-  "wb" 'balance-windows
-  "wv" 'split-window-right
-  "ws" 'split-window-below
-  "wn" 'other-window
-  "wb" 'previous-window
-  "wd" 'delete-window)
+    "<SPC>" 'execute-extended-command
+    "bl" 'switch-to-buffer
+    "bn" 'switch-to-next-buffer
+    "bb" 'switch-to-previous-buffer
+    "bd" 'kill-buffer
+    "ff" 'find-file
+    "ha" 'apropos-command
+    "hi" 'info
+    "hb" 'describe-bindings
+    "hk" 'describe-key
+    "ms" 'magit-status
+    "mc" 'magit-commit
+    "mp" 'magit-push
+    "wb" 'balance-windows
+    "wv" 'split-window-right
+    "ws" 'split-window-below
+    "wn" 'other-window
+    "wb" 'previous-window
+    "wd" 'delete-window
+    "xx" 'eval-last-sexp
+    "xe" 'eval-expression)
 
 ;; UNDO TREE
 (use-package undo-tree
-  :diminish undo-tree-mode
-  :config 
-  (global-undo-tree-mode 1))
+    :diminish undo-tree-mode
+    :defer
+    :config 
+    (global-undo-tree-mode 1))
 
 ;; SMOOTH SCROLLING
 (use-package smooth-scrolling
-  :config
-  (setq smooth-scroll-margin 5
-        scroll-conservatively 101
-        scroll-preserve-screen-position t
-        auto-window-vscroll nil
-        scroll-margin 5)
-  (smooth-scrolling-mode 1))
+    :config
+    (setq smooth-scroll-margin 5
+	    scroll-conservatively 101
+	    scroll-preserve-screen-position t
+	    auto-window-vscroll nil
+	    scroll-margin 5)
+    (smooth-scrolling-mode 1))
 
 
 ;; WHICH KEY
 (use-package which-key
-  :diminish which-key-mode
-  :config
-  (which-key-mode 1)
-  (setq which-key-idle-delay 0.5
-        which-key-popup-type 'side-window
-        which-key-side-window-location 'bottom))
+    :diminish which-key-mode
+    :config
+    (which-key-mode 1)
+    (setq which-key-idle-delay 0.5
+	    which-key-popup-type 'side-window
+	    which-key-side-window-location 'bottom))
 
 ;; MAGIT
-(use-package magit)
+(use-package magit
+    :defer)
 
 ;; COMPANY MODE
-(use-package company)
+(use-package company
+    :defer)
 ;; Enable automatically for all buffers
 (add-hook 'after-init-hook 'global-company-mode)
 
@@ -130,13 +141,24 @@
 
 ;; Brackets
 ;; Colored paranthesis
-(use-package rainbow-delimiters)
+(use-package rainbow-delimiters
+  :defer)
 ;; Enable raindow delimiters for all programming modes
 (add-hook 'prog-mode-hook 'rainbow-delimiters-mode) 
 ;; Auto close paranthesis
 (use-package smartparens)
 ;; Enable smart parenthesis for all programming modes
 (add-hook 'prog-mode-hook 'smartparens-mode) 
+
+;; ADVANCDED CUSTOMIZATION
+;; Startup time
+(defun efs/display-startup-time ()
+  (message "Emacs loaded in %s with %d garbage collections."
+	   (format "%.2f seconds"
+		   (float-time
+		     (time-subtract after-init-time before-init-time)))
+	   gcs-done))
+(add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
