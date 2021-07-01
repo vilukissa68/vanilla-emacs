@@ -154,7 +154,6 @@
   :after ivy-rich
   :init (all-the-icons-ivy-rich-mode 1))
 												     
-
 ;; NEOTREE
 (use-package neotree)
 
@@ -193,20 +192,56 @@
 
 
 ;; PYTHON
-(use-package elpy
-  :ensure t
-  :defer t
-  :init
-  (advice-add 'python-mode :before 'elpy-enable)
-  :config
-  (add-hook 'elpy-mode-hook '(lambda ()
-			       (progn
-				 (setq-local flymake-start-syntax-check-on-newline t)
-				 (setq-local flymake-no-changes-timeout 0.5))))
-  (evil-leader/set-key-for-mode 'python-mode
-    "cc" 'elpy-shell-send-buffer
-    "gd" 'elpy-goto-definition))
+;;(use-package elpy
+;;  :ensure t
+;;  :defer t
+;;  :init
+;;  (advice-add 'python-mode :before 'elpy-enable)
+;;  :config
+;;  (add-hook 'elpy-mode-hook '(lambda ()
+	;;		       (progn
+		;;		 (setq-local flymake-start-syntax-check-on-newline t)
+			;;	 (setq-local flymake-no-changes-timeout 0.5))))
+;;  (evil-leader/set-key-for-mode 'python-mode
+;;    "cc" 'elpy-shell-send-buffer
+;;    "gd" 'elpy-goto-definition))
 
+
+;; PYvENV
+(use-package pyvenv 
+  :ensure t
+  :config
+  (setenv "WORKON_HOME" "~/anaconda3/envs")
+  (pyvenv-mode 1))
+
+;; ANACONDA
+(use-package anaconda-mode
+  :config
+  (add-hook 'python-mode-hook 'anaconda-mode)
+  (add-hook 'python-mode-hook 'anaconda-eldoc-mode)
+  (evil-leader/set-key-for-mode 'anaconda-mode
+    "mc" 'anaconda-mode-complete))
+
+
+;; JUPYTER NOTEBOOKS
+(use-package ein
+  :defer t
+  :config
+  (setq ein:worksheet-enable-undo t)
+  (setq ein:output-area-inlined-images t)
+  (evil-leader/set-key-for-mode 'Notebook
+    "mca" 'ein:worksheet-insert-cell-above-km
+    "mcb" 'ein:worksheet-insert-cell-below-km
+    "mcc" 'ein:worksheet-copy-cell-km
+    "mcy" 'ein:worksheet-yank-cell-km
+    "mcd" 'ein:worksheet-kill-cell-km
+    "mcc" 'ein:worksheet-copy-cell-km
+    "mcm" 'ein:worksheet-merge-cell-km
+    "moc" 'ein:worksheet-clear-all-output-km
+    "mww" 'ein:notebook-save-notebook)
+  (evil-define-key 'motion "S-<up>" 'ein:worksheet-move-cell-up-km)
+  (evil-define-key 'motion "S-<down>" 'ein:worksheet-move-cell-down-km)
+  (evil-define-key 'normal "RET" 'ein:worksheet-execute-cell-and-goto-next-km))
 
 ;; GENERAL
 ;; Line numbers
@@ -293,7 +328,7 @@
  '(custom-safe-themes
    '("549ccbd11c125a4e671a1e8d3609063a91228e918ffb269e57bd2cd2c0a6f1c6" default))
  '(package-selected-packages
-   '(counsel-world-clock counsel-spotify evil-leader use-package evil diminish)))
+   '(projectile counsel-world-clock counsel-spotify evil-leader use-package evil diminish)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
