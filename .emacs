@@ -18,14 +18,17 @@
   (require 'use-package))
 ;; EVIL MODE
 (use-package evil
-    :init
+  :ensure t
+  :init
     (setq evil-want-keybinding nil)
-    :config
     (evil-mode 1)
+  :config
     (setq evil-want-fine-undo 'fine))
+
 (use-package evil-leader)
 (use-package evil-surround
   :ensure t
+  :after evil
   :config
     (global-evil-surround-mode 1))
 (use-package evil-collection
@@ -45,8 +48,9 @@
     "bb" 'switch-to-previous-buffer
     "bd" 'kill-current-buffer
     "ff" 'find-file
-    "ft" 'neotree-toggle
-    "ha" 'apropos-command
+    "ft" 'treemacs
+    "fed" 'my/open-configuration
+    "fer" 'my/reload-configuration
     "hi" 'info
     "hb" 'describe-bindings
     "hk" 'describe-key
@@ -103,7 +107,8 @@
 	company-show-numbers t
 	company-tooltip-limit 7
 	company-tooltip-align-annotations t
-	company-tooltip-flip-when-above t)
+	company-tooltip-flip-when-above t
+	)
   ;; Enable automatically for all buffers
   (global-company-mode t))
 
@@ -154,8 +159,8 @@
   :after ivy-rich
   :init (all-the-icons-ivy-rich-mode 1))
 												     
-;; NEOTREE
-(use-package neotree)
+;; TREEMACS
+(use-package treemacs)
 
 ;; YASNIPPET
 (use-package yasnippet
@@ -175,7 +180,7 @@
   (require 'evil-org-agenda)
   (evil-org-agenda-set-keys)
   ;; Configure leader key
-  (evil-leader/set-ket-for-mode 'org-mode
+  (evil-leader/set-key-for-mode 'org-mode
     "ot" 'org-todo
     "oT" 'org-show-todo-tree
     "ov" 'org-mark-element
@@ -186,10 +191,30 @@
     "ois" 'org-insert-subheading
     "op" 'org-previous-visible-heading
     "on" 'org-next-visible-heading
-    "ort" 'org-ali))
+    "ort" 'org-ali
+    "oss" 'org-tree-slide-mode))
+
+;; Org-mode presentations
+(use-package org-tree-slide
+  :after org
+  :custom
+  (org-image-actual-width nil))
 
 ;; C/C++
+(use-package lsp-mode
+  :defer t
+  :config
+    (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+    ;;(evil-define-key '(normal visual) 'lsp-mode (kbd "SPC l") lsp-command-map)
+    (evil-leader/set-key "l" lsp-command-map)
+    (evil-normalize-keymaps))
 
+(use-package dap-mode
+  :after lsp-mode)
+(use-package lsp-treemacs
+  :after lsp-mode)
+(add-hook 'c-mode-hook 'lsp)
+(add-hook 'c++-mode-hook 'lsp)
 
 ;; PYTHON
 ;;(use-package elpy
@@ -316,8 +341,15 @@
 
 
 
-;; SPLASH SCREEN
+;; USER DEFINED FUNCTION
+(defun my/open-configuration ()
+  (interactive)
+  (find-file "~/.emacs"))
+(defun my/reload-configuration ()
+  (interactive)
+  (load-file "~/.emacs"))
 
+;; USER DEFINED HOOKS
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
