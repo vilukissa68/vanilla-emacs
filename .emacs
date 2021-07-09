@@ -200,36 +200,48 @@
   :custom
   (org-image-actual-width nil))
 
+
 ;; C/C++
 (use-package lsp-mode
-  :defer t
+  :ensure t
   :config
     (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
     ;;(evil-define-key '(normal visual) 'lsp-mode (kbd "SPC l") lsp-command-map)
     (evil-leader/set-key "l" lsp-command-map)
     (evil-normalize-keymaps))
 
-(use-package dap-mode
-  :after lsp-mode)
-(use-package lsp-treemacs
-  :after lsp-mode)
+(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+(use-package lsp-ui)
+(use-package dap-mode)
+(use-package lsp-treemacs)
+
+;; Hook to lsp
 (add-hook 'c-mode-hook 'lsp)
 (add-hook 'c++-mode-hook 'lsp)
+(add-hook 'lsp-mode
+	    '(lambda ()
+		    (progn
+				(setq-local flymake-start-syntax-check-on-newline t)
+				(setq-local flymake-no-changes-timeout 0.5))))
 
 ;; PYTHON
-;;(use-package elpy
-;;  :ensure t
-;;  :defer t
-;;  :init
-;;  (advice-add 'python-mode :before 'elpy-enable)
-;;  :config
-;;  (add-hook 'elpy-mode-hook '(lambda ()
-	;;		       (progn
-		;;		 (setq-local flymake-start-syntax-check-on-newline t)
-			;;	 (setq-local flymake-no-changes-timeout 0.5))))
-;;  (evil-leader/set-key-for-mode 'python-mode
-;;    "cc" 'elpy-shell-send-buffer
-;;    "gd" 'elpy-goto-definition))
+(use-package elpy
+  :ensure t
+  :defer t
+ :init
+  (advice-add 'python-mode :before 'elpy-enable)
+  ;; elpy syntax check new line
+  (add-hook 'elpy-mode-hook
+	    '(lambda ()
+		       (progn
+				 (setq-local flymake-start-syntax-check-on-newline t)
+				 (setq-local flymake-no-changes-timeout 0.5))))
+  :config
+  (evil-leader/set-key-for-mode 'python-mode
+    "me" 'elpy-shell-send-buffer
+    "md" 'elpy-doc
+    "gd" 'elpy-goto-definition))
+
 
 
 ;; PYvENV
@@ -239,13 +251,14 @@
   (setenv "WORKON_HOME" "~/anaconda3/envs")
   (pyvenv-mode 1))
 
+
 ;; ANACONDA
-(use-package anaconda-mode
-  :config
-  (add-hook 'python-mode-hook 'anaconda-mode)
-  (add-hook 'python-mode-hook 'anaconda-eldoc-mode)
-  (evil-leader/set-key-for-mode 'anaconda-mode
-    "mc" 'anaconda-mode-complete))
+;;(use-package anaconda-mode
+;;  :config
+ ;; (add-hook 'python-mode-hook 'anaconda-mode)
+ ;; (add-hook 'python-mode-hook 'anaconda-eldoc-mode)
+ ;; (evil-leader/set-key-for-mode 'anaconda-mode
+  ;;  "mc" 'anaconda-mode-complete))
 
 
 ;; JUPYTER NOTEBOOKS
@@ -340,6 +353,17 @@
 (add-hook 'emacs-startup-hook #'efs/display-startup-time)
 
 
+;; SPALSH SCREEN
+(use-package dashboard
+  :ensure t
+  :diminish dashboard-mode
+  :config
+  (setq dashboard-banner-logo-title "Emacs is Lisp!")
+  ;;(setq dashboard-startup-banner "/path/to/image")
+  (setq dashboard-items '((recents . 10)
+			  (bookmarks . 10)))
+  (dashboard-setup-startup-hook))
+
 
 ;; USER DEFINED FUNCTION
 (defun my/open-configuration ()
@@ -358,7 +382,7 @@
  '(ansi-color-names-vector
    ["#282a36" "#ff5555" "#50fa7b" "#f1fa8c" "#6272a4" "#bd93f9" "#8be9fd" "#f8f8f2"])
  '(custom-safe-themes
-   '("549ccbd11c125a4e671a1e8d3609063a91228e918ffb269e57bd2cd2c0a6f1c6" default))
+   '("88f59acbeacefb4998f45126d4d8ae8b2184f2a48753db362a349fd55321c7e1" "5784d048e5a985627520beb8a101561b502a191b52fa401139f4dd20acb07607" "549ccbd11c125a4e671a1e8d3609063a91228e918ffb269e57bd2cd2c0a6f1c6" default))
  '(package-selected-packages
    '(projectile counsel-world-clock counsel-spotify evil-leader use-package evil diminish)))
 (custom-set-faces
