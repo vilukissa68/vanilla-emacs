@@ -159,6 +159,15 @@
   :after ivy-rich
   :init (all-the-icons-ivy-rich-mode 1))
 												     
+;; PROJECTILE
+(use-package projectile
+  :ensure t
+  :init
+  (projectile-mode 1)
+  :config
+    (evil-leader/set-key "p" projectile-command-map)
+    (evil-normalize-keymaps))
+
 ;; TREEMACS
 (use-package treemacs)
 
