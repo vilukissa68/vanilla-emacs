@@ -43,20 +43,37 @@
 (evil-leader/set-leader "SPC")
 (evil-leader/set-key 
     "<SPC>" 'execute-extended-command
-    "bl" 'switch-to-buffer
+    "bb" 'switch-to-buffer
     "bn" 'switch-to-next-buffer
-    "bb" 'switch-to-previous-buffer
+    "bp" 'switch-to-previous-buffer
     "bd" 'kill-current-buffer
+    "cm" 'compile
     "ff" 'find-file
     "ft" 'treemacs
+    "fr" 'revert-buffer
     "fed" 'my/open-configuration
     "fer" 'my/reload-configuration
     "hi" 'info
     "hb" 'describe-bindings
+    "hf" 'describe-function
     "hk" 'describe-key
     "gs" 'magit-status
     "gc" 'magit-commit
     "gp" 'magit-push
+    "oc" 'org-capture
+    "os" 'org-schedule
+    "ot" 'org-set-tags-command
+    "oT" 'org-todo-list
+    "ov" 'org-mark-element
+    "oa" 'org-agenda
+    "ol" 'evil-org-open-links
+    "oC" 'org-resolve-clocks
+    "oih" 'org-insert-heading-respect-content
+    "ois" 'org-insert-subheading
+    "op" 'org-previous-visible-heading
+    "on" 'org-next-visible-heading
+    "ort" 'org-ali
+    "oS" 'org-tree-slide-mode
     "wb" 'balance-windows
     "wv" 'split-window-right
     "ws" 'split-window-below
@@ -177,31 +194,38 @@
   (yas-global-mode t))
 
 ;; ORG-MODE
-(use-package org)
+(use-package org
+  :ensure t
+  :config
+  ;; Set agenda files
+    (setq org-agenda-files (list "~/Dropbox/orgfiles/gcal.org"
+				 "~/Dropbox/orgfiles/tasks.org"
+				 "~/Dropbox/orgfiles/notes.org"))
+  ;; Define capture templates
+    (setq org-capture-templates
+	'(("a" "Appointment" entry (file  "~/Dropbox/orgfiles/gcal.org" )
+	"* %^{Brief Descriptions} %^G")
+	("l" "Link" entry (file+headline "~/Dropbox/orgfiles/notes.org" "Links")
+	"* %? %^L %^g \n%T" :prepend t)
+	("t" "To Do Item" entry (file "~/Dropbox/orgfiles/tasks.org")
+	"* TODO %?\n%u" :prepend t)
+	("n" "Note" entry (file+headline "~/Dropbox/orgfiles/notes.org" "Note space")
+	"* %?\n%u" :prepend t)
+    )))
+
 (use-package org-bullets
   :after org
   :hook (org-mode . org-bullets-mode))
+
 (use-package evil-org
   :ensure t
   :after org
-  :hook (org-mode . evil-org-mode)
+  :hook (org-mode . (lambda () evil-org-mode))
   :config
+  (evil-org-set-key-theme '(textobjects insert navigation additional shift todo heading))
   (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys)
-  ;; Configure leader key
-  (evil-leader/set-key-for-mode 'org-mode
-    "ot" 'org-todo
-    "oT" 'org-show-todo-tree
-    "ov" 'org-mark-element
-    "oa" 'org-agenda
-    "ol" 'evil-org-open-links
-    "oC" 'org-resolve-clocks
-    "oih" 'org-insert-heading-respect-content
-    "ois" 'org-insert-subheading
-    "op" 'org-previous-visible-heading
-    "on" 'org-next-visible-heading
-    "ort" 'org-ali
-    "oss" 'org-tree-slide-mode))
+  (evil-org-agenda-set-keys))
+  ;; Enable in all modes
 
 ;; Org-mode presentations
 (use-package org-tree-slide
@@ -209,6 +233,9 @@
   :custom
   (org-image-actual-width nil))
 
+
+;; Load GCAL setup
+(load "~/Dropbox/orgfiles/orgsetup.el")
 
 ;; C/C++
 (use-package lsp-mode
@@ -290,6 +317,63 @@
   (evil-define-key 'motion "S-<down>" 'ein:worksheet-move-cell-down-km)
   (evil-define-key 'normal "RET" 'ein:worksheet-execute-cell-and-goto-next-km))
 
+
+;; LATEX
+(use-package pdf-tools
+  :ensure t
+  :config
+  (pdf-tools-install)
+  (setq-default pdf-view-display-size 'fit-page)
+  (setq pdf-annot-activate-created-annotations t)
+  (define-key pdf-view-mode-map (kbd "C-s") 'isearch-forward)
+  (define-key pdf-view-mode-map (kbd "C-r") 'isearch-backward)
+  (add-hook 'pdf-view-mode-hook (lambda ()
+				  (bms/pdf-midnite-amber))) ; automatically turns on midnight-mode for pdfs
+  )
+
+(use-package auctex-latexmk
+  :ensure t
+  :config
+  (auctex-latexmk-setup)
+  (setq auctex-latexmk-inherit-TeX-PDF-mode t))
+
+(use-package reftex
+  :ensure t
+  :defer t
+  :config
+  (setq reftex-cite-prompt-optional-args t)) ;; Prompt for empty optional arguments in cite
+
+;(use-package auto-dictionary
+;  :ensure t
+;  :init(add-hook 'flyspell-mode-hook (lambda () (auto-dictionary-mode 1))))
+
+(use-package company-auctex
+  :ensure t
+  :init (company-auctex-init))
+
+(use-package tex
+  :ensure auctex
+  :mode ("\\.tex\\'" . latex-mode)
+  :config (progn
+	    (setq TeX-source-correlate-mode t)
+	    (setq TeX-source-correlate-method 'synctex)
+	    (setq TeX-auto-save t)
+	    (setq TeX-parse-self t)
+	    (setq-default TeX-master "paper.tex")
+	    (setq reftex-plug-into-AUCTeX t)
+	    (pdf-tools-install)
+	    (setq TeX-view-program-selection '((output-pdf "PDF Tools"))
+		  TeX-source-correlate-start-server t)
+	    ;; Update PDF buffers after successful LaTeX runs
+	    (add-hook 'TeX-after-compilation-finished-functions
+		      #'TeX-revert-document-buffer)
+	    (add-hook 'LaTeX-mode-hook
+		      (lambda ()
+			(reftex-mode t)
+			(flyspell-mode t)))
+	    ))
+
+
 ;; GENERAL
 ;; Line numbers
 ;;(global-display-line-numbers-mode)
@@ -321,6 +405,35 @@
   (setq doom-modeline-lsp t)
   (setq doom-modeline--battery-status t)
   )
+
+;; Pywal integration
+(use-package ewal
+  :init (setq ewal-use-built-in-always-p nil
+              ewal-use-built-in-on-failure-p t
+              ewal-built-in-palette "sexy-material"))
+(use-package ewal-spacemacs-themes
+  :init (progn
+          (setq spacemacs-theme-underline-parens t
+                my:rice:font (font-spec
+                              :family "Source Code Pro"
+                              :weight 'semi-bold
+                              :size 11.0))
+          (show-paren-mode +1)
+          (global-hl-line-mode)
+          (set-frame-font my:rice:font nil t)
+          (add-to-list  'default-frame-alist
+                        `(font . ,(font-xlfd-name my:rice:font))))
+  :config (progn
+            (load-theme 'ewal-spacemacs-modern t)
+            (enable-theme 'ewal-spacemacs-modern)))
+(use-package ewal-evil-cursors
+  :after (ewal-spacemacs-themes)
+  :config (ewal-evil-cursors-get-colors
+           :apply t :spaceline t))
+(use-package spaceline
+  :after (ewal-evil-cursors winum)
+  :init (setq powerline-default-separator nil)
+  :config (spaceline-spacemacs-theme))
 
 ;; Icons
 (use-package all-the-icons)
